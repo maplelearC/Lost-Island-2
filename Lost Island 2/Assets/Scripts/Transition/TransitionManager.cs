@@ -5,10 +5,16 @@ using UnityEngine.SceneManagement;
 
 public class TransitionManager : Singleton<TransitionManager>
 {
+    [SceneName] public string startScene;
     public CanvasGroup fadeCanvasGroup;
     public float fadeDuration;
     
     private bool isFade;
+
+    void Start()
+    {
+        StartCoroutine(TransitionToScene(string.Empty, startScene));
+    }
     public void Transition(string form, string to)
     {
         if (!isFade)
@@ -21,13 +27,20 @@ public class TransitionManager : Singleton<TransitionManager>
     private IEnumerator TransitionToScene(string form, string to)
     {
         yield return Fade(1);
-        yield return SceneManager.UnloadSceneAsync(form);
+
+        if (form != string.Empty)
+        {
+            EventHandler.CallBeforeSceneUnloadEvent();
+            yield return SceneManager.UnloadSceneAsync(form);
+        }
+        
         yield return SceneManager.LoadSceneAsync(to,LoadSceneMode.Additive);
         
         //设置新场景位激活场景
         Scene newScene = SceneManager.GetSceneAt(SceneManager.sceneCount - 1);
         SceneManager.SetActiveScene(newScene);
-        
+
+        EventHandler.CallAfterSceneUnloadEvent();
         yield return Fade(0);
     }
     
