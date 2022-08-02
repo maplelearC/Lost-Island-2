@@ -6,6 +6,8 @@ public class ObjectManager : MonoBehaviour
 {
     private Dictionary<ItemName, bool> itemAvailableDict = new Dictionary<ItemName, bool>();
 
+    private Dictionary<string, bool> interactiveStateDict = new Dictionary<string, bool>();
+
     void OnEnable()
     {
         EventHandler.BeforeSceneUnloadEvent += OnBeforeSceneUnloadEvent;
@@ -20,7 +22,6 @@ public class ObjectManager : MonoBehaviour
         EventHandler.UpdateUIEvent -= OnUpdateUIEvent;
     }
 
-
     private void OnBeforeSceneUnloadEvent()
     {
         foreach (var item in FindObjectsOfType<Item>())
@@ -28,6 +29,18 @@ public class ObjectManager : MonoBehaviour
             if (!itemAvailableDict.ContainsKey(item.itemName))
             {
                 itemAvailableDict.Add(item.itemName, true);
+            }
+        }
+
+        foreach (var item in FindObjectsOfType<Interactive>())
+        {
+            if (interactiveStateDict.ContainsKey(item.name))
+            {
+                interactiveStateDict[item.name] = item.isDone;
+            }
+            else
+            {
+                interactiveStateDict.Add(item.name, item.isDone);
             }
         }
     }
@@ -44,6 +57,18 @@ public class ObjectManager : MonoBehaviour
             else
             {
                 item.gameObject.SetActive(itemAvailableDict[item.itemName]);
+            }
+        }
+
+        foreach (var item in FindObjectsOfType<Interactive>())
+        {
+            if (interactiveStateDict.ContainsKey(item.name))
+            {
+                item.isDone = interactiveStateDict[item.name];
+            }
+            else
+            {
+                interactiveStateDict.Add(item.name, item.isDone);
             }
         }
     }

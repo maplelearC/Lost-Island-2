@@ -5,23 +5,40 @@ using UnityEngine.SceneManagement;
 
 public class TransitionManager : Singleton<TransitionManager>
 {
-    [SceneName] public string startScene;
+    [SceneName]
+    public string startScene;
     public CanvasGroup fadeCanvasGroup;
     public float fadeDuration;
-    
+
     private bool isFade;
+    private bool canTransition;
+
+    void OnEnable()
+    {
+        EventHandler.GameStateChangedEvent += OnGameStateChangedEvent;
+    }
+
+    void OnDisable()
+    {
+        EventHandler.GameStateChangedEvent += OnGameStateChangedEvent;
+    }
+
+    private void OnGameStateChangedEvent(GameState gameState)
+    {
+        canTransition = gameState == GameState.GamePlay;
+    }
 
     void Start()
     {
         StartCoroutine(TransitionToScene(string.Empty, startScene));
     }
+
     public void Transition(string form, string to)
     {
-        if (!isFade)
+        if (!isFade && canTransition)
         {
             StartCoroutine(TransitionToScene(form, to));
         }
-        
     }
 
     private IEnumerator TransitionToScene(string form, string to)
@@ -33,9 +50,9 @@ public class TransitionManager : Singleton<TransitionManager>
             EventHandler.CallBeforeSceneUnloadEvent();
             yield return SceneManager.UnloadSceneAsync(form);
         }
-        
-        yield return SceneManager.LoadSceneAsync(to,LoadSceneMode.Additive);
-        
+
+        yield return SceneManager.LoadSceneAsync(to, LoadSceneMode.Additive);
+
         //设置新场景位激活场景
         Scene newScene = SceneManager.GetSceneAt(SceneManager.sceneCount - 1);
         SceneManager.SetActiveScene(newScene);
@@ -43,7 +60,7 @@ public class TransitionManager : Singleton<TransitionManager>
         EventHandler.CallAfterSceneUnloadEvent();
         yield return Fade(0);
     }
-    
+
     /// <summary>
     /// 淡入淡出场景
     /// </summary>
@@ -59,7 +76,11 @@ public class TransitionManager : Singleton<TransitionManager>
 
         while (!Mathf.Approximately(fadeCanvasGroup.alpha, taegetAlpha))
         {
-            fadeCanvasGroup.alpha = Mathf.MoveTowards(fadeCanvasGroup.alpha, taegetAlpha, speed * Time.deltaTime);
+            fadeCanvasGroup.alpha = Mathf.MoveTowards(
+                fadeCanvasGroup.alpha,
+                taegetAlpha,
+                speed * Time.deltaTime
+            );
             yield return null;
         }
 
