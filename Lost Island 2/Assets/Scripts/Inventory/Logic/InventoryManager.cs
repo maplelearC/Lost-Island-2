@@ -1,25 +1,40 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class InventoryManager : Singleton<InventoryManager>
+public class InventoryManager : Singleton<InventoryManager>,ISaveable
 {
     public ItemDataList_SO itemData;
-    
-    [SerializeField]private List<ItemName> itemList = new List<ItemName>();
+
+    [SerializeField]
+    private List<ItemName> itemList = new List<ItemName>();
 
     void OnEnable()
     {
-        EventHandler.ItemUsedEvent+=OnItemUsedEvent;
-        EventHandler.ChangeItemEvent +=OnChangeItemEvent;
-        EventHandler.AfterSceneUnloadEvent+=OnAfterSceneUnloadEvent;
+        EventHandler.ItemUsedEvent += OnItemUsedEvent;
+        EventHandler.ChangeItemEvent += OnChangeItemEvent;
+        EventHandler.AfterSceneUnloadEvent += OnAfterSceneUnloadEvent;
+        EventHandler.StartNewGameEvent += OnStartNewGameEvent;
     }
 
     void OnDisable()
     {
-        EventHandler.ItemUsedEvent-=OnItemUsedEvent;
-        EventHandler.ChangeItemEvent -=OnChangeItemEvent;
-        EventHandler.AfterSceneUnloadEvent-=OnAfterSceneUnloadEvent;
+        EventHandler.ItemUsedEvent -= OnItemUsedEvent;
+        EventHandler.ChangeItemEvent -= OnChangeItemEvent;
+        EventHandler.AfterSceneUnloadEvent -= OnAfterSceneUnloadEvent;
+        EventHandler.StartNewGameEvent -= OnStartNewGameEvent;
+    }
+
+    private void Start()
+    {
+        ISaveable saveable = this;
+        saveable.SaveableRegister();
+    }
+
+    private void OnStartNewGameEvent(int obj)
+    {
+        itemList.Clear();
     }
 
     private void OnAfterSceneUnloadEvent()
@@ -32,7 +47,7 @@ public class InventoryManager : Singleton<InventoryManager>
         {
             for (int i = 0; i < itemList.Count; i++)
             {
-                EventHandler.CallUpdateUIEvent(itemData.GetItemDetails(itemList[i]),i);
+                EventHandler.CallUpdateUIEvent(itemData.GetItemDetails(itemList[i]), i);
             }
         }
     }
@@ -42,7 +57,7 @@ public class InventoryManager : Singleton<InventoryManager>
         if (index >= 0 && index < itemList.Count)
         {
             ItemDetails item = itemData.GetItemDetails(itemList[index]);
-            EventHandler.CallUpdateUIEvent(item,index);
+            EventHandler.CallUpdateUIEvent(item, index);
         }
     }
 
@@ -63,7 +78,7 @@ public class InventoryManager : Singleton<InventoryManager>
         {
             itemList.Add(itemName);
             //对应UI显示
-            EventHandler.CallUpdateUIEvent(itemData.GetItemDetails(itemName),itemList.Count-1);
+            EventHandler.CallUpdateUIEvent(itemData.GetItemDetails(itemName), itemList.Count - 1);
         }
     }
 
@@ -80,4 +95,15 @@ public class InventoryManager : Singleton<InventoryManager>
         return -1;
     }
 
+    public GameSaveData GenerateSaveData()
+    {
+        GameSaveData saveData = new GameSaveData();
+        saveData.itemList=this.itemList;
+        return saveData;
+    }
+
+    public void RestoreGameData(GameSaveData saveData)
+    {
+        saveData.itemList=this.itemList;
+    }
 }

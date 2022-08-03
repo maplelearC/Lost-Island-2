@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class CursorManager : MonoBehaviour
 {
@@ -8,6 +9,7 @@ public class CursorManager : MonoBehaviour
         Camera.main.ScreenToWorldPoint(
             new Vector3(Input.mousePosition.x, Input.mousePosition.y, 0)
         );
+
     private bool canClicks = false;
 
     public RectTransform hand;
@@ -33,6 +35,7 @@ public class CursorManager : MonoBehaviour
         {
             currentItem = itemDetails.itemName;
         }
+
         hand.gameObject.SetActive(holdItem);
     }
 
@@ -50,6 +53,11 @@ public class CursorManager : MonoBehaviour
         if (hand.gameObject.activeInHierarchy)
         {
             hand.position = Input.mousePosition;
+        }
+
+        if (InteractiveWithUI())
+        {
+            return;
         }
 
         if (canClicks && Input.GetMouseButtonDown(0))
@@ -81,6 +89,7 @@ public class CursorManager : MonoBehaviour
                 {
                     interactive?.EmptyClicked();
                 }
+
                 break;
         }
     }
@@ -92,5 +101,15 @@ public class CursorManager : MonoBehaviour
     private Collider2D ObjectAtMousePosition()
     {
         return Physics2D.OverlapPoint(mouseWorldPos);
+    }
+
+    private bool InteractiveWithUI()
+    {
+        if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
+        {
+            return true;
+        }
+
+        return false;
     }
 }

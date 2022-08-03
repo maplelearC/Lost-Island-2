@@ -1,11 +1,11 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ObjectManager : MonoBehaviour
+public class ObjectManager : MonoBehaviour, ISaveable
 {
     private Dictionary<ItemName, bool> itemAvailableDict = new Dictionary<ItemName, bool>();
-
     private Dictionary<string, bool> interactiveStateDict = new Dictionary<string, bool>();
 
     void OnEnable()
@@ -13,6 +13,7 @@ public class ObjectManager : MonoBehaviour
         EventHandler.BeforeSceneUnloadEvent += OnBeforeSceneUnloadEvent;
         EventHandler.AfterSceneUnloadEvent += OnAfterSceneUnloadEvent;
         EventHandler.UpdateUIEvent += OnUpdateUIEvent;
+        EventHandler.StartNewGameEvent += OnStartNewGameEvent;
     }
 
     void OnDisable()
@@ -20,6 +21,19 @@ public class ObjectManager : MonoBehaviour
         EventHandler.BeforeSceneUnloadEvent -= OnBeforeSceneUnloadEvent;
         EventHandler.AfterSceneUnloadEvent -= OnAfterSceneUnloadEvent;
         EventHandler.UpdateUIEvent -= OnUpdateUIEvent;
+        EventHandler.StartNewGameEvent -= OnStartNewGameEvent;
+    }
+
+    private void Start()
+    {
+        ISaveable saveable = this;
+        saveable.SaveableRegister();
+    }
+
+    private void OnStartNewGameEvent(int obj)
+    {
+        itemAvailableDict.Clear();
+        interactiveStateDict.Clear();
     }
 
     private void OnBeforeSceneUnloadEvent()
@@ -79,5 +93,20 @@ public class ObjectManager : MonoBehaviour
         {
             itemAvailableDict[itemDetails.itemName] = false;
         }
+    }
+
+    public GameSaveData GenerateSaveData()
+    {
+        GameSaveData saveData = new GameSaveData();
+        saveData.itemAvailableDict = this.itemAvailableDict;
+        saveData.interactiveStateDict = this.interactiveStateDict;
+
+        return saveData;
+    }
+
+    public void RestoreGameData(GameSaveData saveData)
+    {
+        this.itemAvailableDict = saveData.itemAvailableDict;
+        this.interactiveStateDict = saveData.interactiveStateDict;
     }
 }

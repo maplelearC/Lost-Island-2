@@ -44,19 +44,39 @@ public static class EventHandler
     {
         ChangeItemEvent?.Invoke(index);
     }
-    
+
     public static event Action<string> ShowDialogueEvent;
 
     public static void CallShowDialogueEvent(string dialogue)
     {
         ShowDialogueEvent?.Invoke(dialogue);
     }
-    
+
     public static event Action<GameState> GameStateChangedEvent;
 
     public static void CallGameStateChangedEvent(GameState gameState)
     {
         GameStateChangedEvent?.Invoke(gameState);
     }
+
+    public static event Action CheckGameStateEvent;
+
+    public static void CallCheckGameStateEvent()
+    {
+        CheckGameStateEvent?.Invoke();
+    }
+
+    public static event Action<string> GamePassEvent;
+
+    public static void CallGamePassEvent(string gameName)
+    {
+        GamePassEvent?.Invoke(gameName);
+    }
     
+    public static event Action<int> StartNewGameEvent;
+
+    public static void CallStartNewGameEvent(int gameWeek)
+    {
+        StartNewGameEvent?.Invoke(gameWeek);
+    }
 }
