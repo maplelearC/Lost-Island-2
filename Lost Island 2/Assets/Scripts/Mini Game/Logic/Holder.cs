@@ -33,6 +33,7 @@ public class Holder : Interactive
                 //移动球
                 currentBall.transform.position = holder.transform.position;
                 currentBall.transform.SetParent(holder.transform);
+               
                 
                 //交换球
                 holder.CheckBall(currentBall);

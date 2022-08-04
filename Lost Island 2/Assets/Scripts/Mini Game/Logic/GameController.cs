@@ -27,11 +27,11 @@ public class GameController : Singleton<GameController>
         EventHandler.CheckGameStateEvent -= OnCheckGameStateEvent;
     }
 
-    void Start()
+    /*void Start()
     {
         DrawLine();
         CreateBall();
-    }
+    }*/
 
     private void OnCheckGameStateEvent()
     {
